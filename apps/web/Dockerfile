@@ -28,7 +28,9 @@ ENV TURBO_TEAM=$TURBO_TEAM
  
 ARG TURBO_TOKEN
 ENV TURBO_TOKEN=$TURBO_TOKEN
- 
+
+ARG TURBO_API	
+ENV TURBO_API=$TURBO_API
 # Build the project
 COPY --from=builder /app/out/full/ .
 RUN yarn turbo run build --filter=web...
