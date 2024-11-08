@@ -5,6 +5,7 @@ Key points:
 - Structure: apps/, packages/, plugins/
 - Focus on privacy, accessibility, and ADHD-friendly design
 - Uses Turborepo for build system
+- Light and dark themes (using shadcn/ui and tailwind css)
 
 Coding standards:
 - TypeScript for type safety
@@ -16,15 +17,6 @@ Coding standards:
 - Keep functions small (single responsibility)
 - Prefer more verbose function names over single letter names
 
-Idea:
-Sidejot AI will ask you what you want to get done today
-
-Then it breaks up the tasks in 25 minute parts.
-
-Once you start the timer. After 25 min you get a notification. You press done or not done.
-
-Then a 5 minute break timer starts.
-
-If you were done, you get the next task, otherwise, it pushes the same task to the next 25 minutes
-
-After the end of the day (or when you press finish day) you see what you still have left to do and you can keep it as part of your context / notes tomorrow
+Local-first + Cross-tab, cross-device sync:
+- Using Dexie for IndexedDB operations
+- Remember that we need to support cross-tab, cross-device sync
