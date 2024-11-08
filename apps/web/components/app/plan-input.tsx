@@ -17,10 +17,31 @@ import { Card } from '../ui/card'
 import { AutoResizeTextarea } from '../ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
+import { useAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
+export const lastGeneratedPlanAtom = atomWithStorage<
+  typeof generatePlanSchema._output | null
+>('lastGeneratedPlan', null)
+
 export function PlanInput() {
+  const [lastGeneratedPlan, setLastGeneratedPlan] = useAtom(
+    lastGeneratedPlanAtom,
+  )
+
   const { object, isLoading, error, submit } = useObject({
     api: '/api/tasks/generate',
     schema: generatePlanSchema,
+    initialValue: lastGeneratedPlan,
+    onFinish: async (result) => {
+      if (result.object) {
+        setLastGeneratedPlan(result.object)
+        return
+      }
+      if (result.error) {
+        console.error(result.error)
+      }
+      toast.error('Something went wrong')
+    },
   })
   const today = new Date()
 
@@ -73,7 +94,6 @@ export function PlanInput() {
           },
         },
       })
-      // await db.tasks.bulkAdd(tasks)
     } catch (error) {
       console.error(error)
       toast.error((error as Error).message)
@@ -193,19 +213,23 @@ const TaskList = ({
       {tasks.map((task, i) => (
         <div key={i} className="bg-neutral-800 p-2 rounded-lg">
           <h3 className="text-sm font-medium">{task!.content}</h3>
-          <p className="text-xs text-muted-foreground">
-            {task.duration} minutes
-          </p>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {task!.tags?.map((tag, tagIndex) => (
-              <span
-                key={tagIndex}
-                className="px-2 py-0.5 text-xs rounded-full bg-neutral-700 text-neutral-200"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+          {task.duration && (
+            <p className="text-xs text-muted-foreground">
+              {task.duration} minutes
+            </p>
+          )}
+          {task.tags?.length ? (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {task!.tags?.map((tag, tagIndex) => (
+                <span
+                  key={tagIndex}
+                  className="px-2 py-0.5 text-xs rounded-full bg-neutral-700 text-neutral-200"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
       ))}
     </div>
