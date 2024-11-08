@@ -13,11 +13,9 @@ export default function Home() {
           Your AI-powered Pomodoro planner for better focus and productivity
         </p>
 
-        <Link href="/app">
-          <Button size="lg" className="text-lg px-8">
-            Get Started
-          </Button>
-        </Link>
+        <Button size="lg" className="text-lg px-8" asChild>
+          <Link href="/app">Get Started</Link>
+        </Button>
 
         {/* Feature Grid */}
         <div className="grid md:grid-cols-3 gap-8 mt-20">
