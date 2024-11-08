@@ -6,7 +6,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 RUN apt-get update
-RUN apt-get install -y libc6-compat curl wget
+RUN apt-get install -y curl wget
 RUN pnpm install -g turbo@^2
 
 FROM deps AS builder
