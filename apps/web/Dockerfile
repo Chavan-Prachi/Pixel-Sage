@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:23-alpine AS base
 
 # Create a stage for common dependencies
 FROM base AS deps
