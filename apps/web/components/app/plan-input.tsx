@@ -2,14 +2,14 @@
 import { generatePlanSchema } from '@/app/api/tasks/generate/schema'
 import { Button } from '@/components/ui/button'
 import { useDebouncedCallback } from '@/hooks/use-debounce'
-import { db } from '@/lib/db'
+import { db, TaskStatus } from '@/lib/db'
 import { getTimeOfDay } from '@/lib/utils'
 import { getDeviceType } from '@/lib/utils'
 import { experimental_useObject as useObject } from 'ai/react'
 import { differenceInMinutes, setHours, setMinutes } from 'date-fns'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUp, BrainCog, Lightbulb, Paperclip, Sparkles } from 'lucide-react'
+import { ArrowRight, ArrowUp, BrainCog, Lightbulb, Paperclip, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Icons } from '../icons'
@@ -118,6 +118,35 @@ export function PlanInput() {
     [object?.backlog],
   )
 
+  const handleScheduleTasks = async () => {
+    try {
+      if (!tasks.length) return
+
+      // Add all tasks to the database
+      const now = new Date()
+      for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i]
+        await db.tasks.add({
+          content: task.content,
+          status: TaskStatus.READY,
+          date: now,
+          createdAt: now,
+          updatedAt: now,
+          order: i,
+          tags: task.tags,
+        })
+      }
+
+      // Clear the generated plan
+      setLastGeneratedPlan(null)
+      
+      toast.success('Tasks scheduled successfully')
+    } catch (error) {
+      console.error('Error scheduling tasks:', error)
+      toast.error('Failed to schedule tasks')
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-center mb-6">
@@ -183,6 +212,10 @@ export function PlanInput() {
         <div className="mt-4">
           <h2 className="text-lg font-medium mb-2">Today</h2>
           <TaskList tasks={tasks} />
+          <Button size="lg" className="w-full mt-4" onClick={handleScheduleTasks}>
+            Confirm and schedule
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
         </div>
       )}
       {backlog.length > 0 && (
