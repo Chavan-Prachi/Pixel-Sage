@@ -7,7 +7,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "turbo run clean",
-    "format": "biome format \"**/*.{ts,tsx,md}\""
+    "format": "biome format ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
