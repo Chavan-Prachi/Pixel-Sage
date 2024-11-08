@@ -32,7 +32,7 @@ ENV TURBO_API=$TURBO_API
 
 # Build the project
 COPY --from=builder /app/out/full/ .
-RUN yarn turbo run build --filter=web...
+RUN pnpm turbo run build --filter=web...
 
 FROM base AS runner
 WORKDIR /app
