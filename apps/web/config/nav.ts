@@ -2,7 +2,7 @@ export const navConfig = {
   mainNav: [
     {
       title: 'App',
-      href: '/app',
+      href: '/',
     },
   ],
   sidebarNav: [
@@ -11,7 +11,7 @@ export const navConfig = {
       items: [
         {
           title: 'App',
-          href: '/app',
+          href: '/',
           label: 'New',
           disabled: false,
         },
