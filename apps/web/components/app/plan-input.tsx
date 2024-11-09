@@ -16,12 +16,14 @@ import { Icons } from '../icons'
 import { Card } from '../ui/card'
 import { AutoResizeTextarea } from '../ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { PlanHistory } from './plan-history'
 
 import { useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 export const lastGeneratedPlanAtom = atomWithStorage<
   typeof generatePlanSchema._output | null
 >('lastGeneratedPlan', null)
+
 
 export function PlanInput() {
   const [lastGeneratedPlan, setLastGeneratedPlan] = useAtom(
@@ -35,6 +37,16 @@ export function PlanInput() {
     onFinish: async (result) => {
       if (result.object) {
         setLastGeneratedPlan(result.object)
+        
+        await db.saveChatHistory(
+          'task-generation',
+          inputValue,
+          result.object,
+          {
+            timeOfDay: getTimeOfDay(new Date()),
+            deviceType: getDeviceType(),
+          }
+        )
         return
       }
       if (result.error) {
@@ -176,19 +188,22 @@ export function PlanInput() {
           />
 
           <div className="flex items-center justify-between gap-2 p-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-accent cursor-not-allowed"
-                  title="Attach files"
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Coming soon</TooltipContent>
-            </Tooltip>
+            <div className="flex gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-accent cursor-not-allowed"
+                    title="Attach files"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Coming soon</TooltipContent>
+              </Tooltip>
+              <PlanHistory onSelect={setInputValue} />
+            </div>
             <Button
               variant="ghost"
               size="icon"

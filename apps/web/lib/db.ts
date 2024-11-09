@@ -1,4 +1,4 @@
-import { startOfDay } from 'date-fns'
+import { format, startOfDay } from 'date-fns'
 import Dexie, { type IndexableType, type Table } from 'dexie'
 import { SessionManager } from './session-manager'
 
@@ -122,23 +122,43 @@ export interface TimerSession {
   lastHeartbeat: Date
 }
 
+/** Chat history for AI interactions */
+export interface ChatHistory<TInput = unknown, TOutput = unknown> {
+  id?: number
+  /** The user's input */
+  input: TInput
+  /** The AI's response */
+  output: TOutput
+  /** When this interaction happened */
+  timestamp: Date
+  /** Type of interaction (e.g., 'task-generation') */
+  type: string
+  /** AI-generated diff of the plan */
+  title: string
+  /** Optional metadata about the interaction */
+  metadata?: Record<string, unknown>
+}
+
 // Define the database
 export class SidejotDB extends Dexie {
   plans!: Table<Plan>
   tasks!: Table<Task>
   timerSessions!: Table<TimerSession>
+  chatHistory!: Table<ChatHistory>
 
   private sessionManager = SessionManager.getInstance()
 
   constructor() {
     super('sidejot')
 
-    this.version(2).stores({
+    this.version(3).stores({
       plans: '++id, content, date, lastUpdated',
       tasks:
         '++id, content, title, status, date, order, createdAt, updatedAt, *tags',
       timerSessions:
         '++id, taskId, type, startTime, endTime, endType, sessionId, lastHeartbeat',
+      chatHistory:
+        '++id, type, timestamp, title, input, output, metadata',
     })
   }
 
@@ -240,6 +260,84 @@ export class SidejotDB extends Dexie {
     } catch (error) {
       console.error('Error deleting task', error)
     }
+  }
+
+  async saveChatHistory<TInput, TOutput>(
+    type: string,
+    input: TInput,
+    output: TOutput,
+    metadata?: Record<string, unknown>
+  ): Promise<void> {
+    try {
+      const date = new Date()
+      const title = await this.getDiffSummaryAsTitle(type, input, date)
+      await this.chatHistory.add({
+        input,
+        output,
+        type,
+        title,
+        timestamp: date,
+        metadata,
+      })
+    } catch (error) {
+      console.error('Error saving chat history:', error)
+    }
+  }
+
+  async getDiffSummaryAsTitle<TInput, TOutput>(
+    type: string,
+    input: TInput,
+    date: Date,
+  ): Promise<string> {
+    try {
+      // Get the most recent chat history entry
+      const previousEntry = await this.chatHistory
+        .where('type')
+        .equals(type)
+        .reverse()
+        .first()
+
+      // If no previous entry exists, return a basic title
+      if (!previousEntry) {
+        return `Initial ${type}`
+      }
+
+      // Call the diff API endpoint
+      const response = await fetch('/api/diff', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          current: input,
+          previous: previousEntry.input,
+          type,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate diff summary')
+      }
+
+      const { summary } = await response.json()
+      return summary
+
+    } catch (error) {
+      console.error('Error generating diff summary:', error)
+      return 'Updated plan' // Fallback title
+    }
+  }
+
+  async getChatHistory<TInput, TOutput>(
+    type: string,
+    limit = 10
+  ): Promise<ChatHistory<TInput, TOutput>[]> {
+    return await this.chatHistory
+      .where('type')
+      .equals(type)
+      .reverse()
+      .limit(limit)
+      .toArray() as ChatHistory<TInput, TOutput>[]
   }
 }
 
