@@ -1,5 +1,5 @@
-import { format, startOfDay } from 'date-fns'
-import Dexie, { type IndexableType, type Table } from 'dexie'
+import { startOfDay } from 'date-fns'
+import Dexie, { type Table } from 'dexie'
 import { SessionManager } from './session-manager'
 
 /**
@@ -157,8 +157,7 @@ export class SidejotDB extends Dexie {
         '++id, content, title, status, date, order, createdAt, updatedAt, *tags',
       timerSessions:
         '++id, taskId, type, startTime, endTime, endType, sessionId, lastHeartbeat',
-      chatHistory:
-        '++id, type, timestamp, title, input, output, metadata',
+      chatHistory: '++id, type, timestamp, title, input, output, metadata',
     })
   }
 
@@ -210,12 +209,12 @@ export class SidejotDB extends Dexie {
     taskId: number,
     type: TimerType,
   ): Promise<TimerSession> {
+    // Abandon any ongoing sessions
     await this.timerSessions
-      .where('endTime')
-      .equals(null as unknown as IndexableType)
-      .modify({
-        endTime: new Date(),
-        endType: TimerEndType.ABANDONED,
+      .filter((x) => !x.endTime)
+      .modify((x) => {
+        x.endTime = new Date()
+        x.endType = TimerEndType.ABANDONED
       })
 
     const session: TimerSession = {
@@ -248,10 +247,15 @@ export class SidejotDB extends Dexie {
   }
 
   async getActiveSession(): Promise<TimerSession | undefined> {
-    return await this.timerSessions
-      .where('endTime')
-      .equals(null as unknown as IndexableType)
-      .first()
+    return await this.timerSessions.filter((x) => !x.endTime).first()
+  }
+
+  async getTask(taskId: number): Promise<Task | undefined> {
+    return await this.tasks.get(taskId)
+  }
+
+  async getActiveTask(): Promise<Task | undefined> {
+    return await this.tasks.filter((x) => x.status === TaskStatus.WORK).first()
   }
 
   async deleteTask(taskId: number): Promise<void> {
@@ -266,11 +270,11 @@ export class SidejotDB extends Dexie {
     type: string,
     input: TInput,
     output: TOutput,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<void> {
     try {
       const date = new Date()
-      const title = await this.getDiffSummaryAsTitle(type, input, date)
+      const title = await this.getDiffSummaryAsTitle(type, input as string)
       await this.chatHistory.add({
         input,
         output,
@@ -284,11 +288,7 @@ export class SidejotDB extends Dexie {
     }
   }
 
-  async getDiffSummaryAsTitle<TInput, TOutput>(
-    type: string,
-    input: TInput,
-    date: Date,
-  ): Promise<string> {
+  async getDiffSummaryAsTitle(type: string, input: string): Promise<string> {
     try {
       // Get the most recent chat history entry
       const previousEntry = await this.chatHistory
@@ -321,7 +321,6 @@ export class SidejotDB extends Dexie {
 
       const { summary } = await response.json()
       return summary
-
     } catch (error) {
       console.error('Error generating diff summary:', error)
       return 'Updated plan' // Fallback title
@@ -330,14 +329,14 @@ export class SidejotDB extends Dexie {
 
   async getChatHistory<TInput, TOutput>(
     type: string,
-    limit = 10
+    limit = 10,
   ): Promise<ChatHistory<TInput, TOutput>[]> {
-    return await this.chatHistory
+    return (await this.chatHistory
       .where('type')
       .equals(type)
       .reverse()
       .limit(limit)
-      .toArray() as ChatHistory<TInput, TOutput>[]
+      .toArray()) as ChatHistory<TInput, TOutput>[]
   }
 }
 

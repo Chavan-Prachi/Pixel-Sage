@@ -2,14 +2,21 @@
 import { generatePlanSchema } from '@/app/api/tasks/generate/schema'
 import { Button } from '@/components/ui/button'
 import { useDebouncedCallback } from '@/hooks/use-debounce'
-import { db, TaskStatus } from '@/lib/db'
+import { TaskStatus, TimerType, db } from '@/lib/db'
 import { getTimeOfDay } from '@/lib/utils'
 import { getDeviceType } from '@/lib/utils'
 import { experimental_useObject as useObject } from 'ai/react'
 import { differenceInMinutes, setHours, setMinutes } from 'date-fns'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, ArrowUp, BrainCog, Lightbulb, Paperclip, Sparkles } from 'lucide-react'
+import {
+  ArrowUp,
+  BrainCog,
+  Lightbulb,
+  Paperclip,
+  PlayIcon,
+  Sparkles,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Icons } from '../icons'
@@ -24,7 +31,6 @@ export const lastGeneratedPlanAtom = atomWithStorage<
   typeof generatePlanSchema._output | null
 >('lastGeneratedPlan', null)
 
-
 export function PlanInput() {
   const [lastGeneratedPlan, setLastGeneratedPlan] = useAtom(
     lastGeneratedPlanAtom,
@@ -37,16 +43,11 @@ export function PlanInput() {
     onFinish: async (result) => {
       if (result.object) {
         setLastGeneratedPlan(result.object)
-        
-        await db.saveChatHistory(
-          'task-generation',
-          inputValue,
-          result.object,
-          {
-            timeOfDay: getTimeOfDay(new Date()),
-            deviceType: getDeviceType(),
-          }
-        )
+
+        await db.saveChatHistory('task-generation', inputValue, result.object, {
+          timeOfDay: getTimeOfDay(new Date()),
+          deviceType: getDeviceType(),
+        })
         return
       }
       if (result.error) {
@@ -130,35 +131,6 @@ export function PlanInput() {
     [object?.backlog],
   )
 
-  const handleScheduleTasks = async () => {
-    try {
-      if (!tasks.length) return
-
-      // Add all tasks to the database
-      const now = new Date()
-      for (let i = 0; i < tasks.length; i++) {
-        const task = tasks[i]
-        await db.tasks.add({
-          content: task.content,
-          status: TaskStatus.READY,
-          date: now,
-          createdAt: now,
-          updatedAt: now,
-          order: i,
-          tags: task.tags,
-        })
-      }
-
-      // Clear the generated plan
-      setLastGeneratedPlan(null)
-      
-      toast.success('Tasks scheduled successfully')
-    } catch (error) {
-      console.error('Error scheduling tasks:', error)
-      toast.error('Failed to schedule tasks')
-    }
-  }
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-center mb-6">
@@ -227,10 +199,6 @@ export function PlanInput() {
         <div className="mt-4">
           <h2 className="text-lg font-medium mb-2">Today</h2>
           <TaskList tasks={tasks} />
-          <Button size="lg" className="w-full mt-4" onClick={handleScheduleTasks}>
-            Confirm and schedule
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
         </div>
       )}
       {backlog.length > 0 && (
@@ -256,28 +224,58 @@ const TaskList = ({
     tags: string[]
   }[]
 }) => {
+  const handleStartDraftTask = async (task: (typeof tasks)[0]) => {
+    // Create a real task and start the timer
+    const order = await db.tasks.count()
+    const newTaskId = await db.tasks.add({
+      content: task.content,
+      status: TaskStatus.WORK,
+      date: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      order,
+      tags: task.tags,
+    })
+
+    // Start the timer immediately
+    await db.startTimerSession(newTaskId, TimerType.WORK)
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {tasks.map((task, i) => (
         <div key={i} className="bg-neutral-800 p-2 rounded-lg">
-          <h3 className="text-sm font-medium">{task!.content}</h3>
-          {task.duration && (
-            <p className="text-xs text-muted-foreground">
-              {task.duration} minutes
-            </p>
-          )}
-          {task.tags?.length ? (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {task!.tags?.map((tag, tagIndex) => (
-                <span
-                  key={tagIndex}
-                  className="px-2 py-0.5 text-xs rounded-full bg-neutral-700 text-neutral-200"
-                >
-                  {tag}
-                </span>
-              ))}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-sm font-medium">{task.content}</h3>
+              {task.duration && (
+                <p className="text-xs text-muted-foreground">
+                  {task.duration} minutes
+                </p>
+              )}
+              {task.tags?.length ? (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {task.tags?.map((tag, tagIndex) => (
+                    <span
+                      key={tagIndex}
+                      className="px-2 py-0.5 text-xs rounded-full bg-neutral-700 text-neutral-200"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
-          ) : null}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:bg-primary/10"
+              onClick={() => handleStartDraftTask(task)}
+            >
+              <PlayIcon className="h-4 w-4 text-primary" />
+              <span className="sr-only">Start Task</span>
+            </Button>
+          </div>
         </div>
       ))}
     </div>
