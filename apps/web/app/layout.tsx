@@ -52,12 +52,7 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: '@shadcn',
-  },
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    creator: '@illyism',
   },
   manifest: `${siteConfig.url}/site.webmanifest`,
 }
@@ -75,6 +70,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <>
       <html lang="en" suppressHydrationWarning>
         <head>
+          <link rel="icon" type="image/png" href="/_static/favicons/favicon-96x96.png" sizes="96x96" />
+          <link rel="icon" type="image/svg+xml" href="/_static/favicons/favicon.svg" />
+          <link rel="shortcut icon" href="/_static/favicons/favicon.ico" />
+          <link rel="apple-touch-icon" sizes="180x180" href="/_static/favicons/apple-touch-icon.png" />
+          <meta name="apple-mobile-web-app-title" content="Sidejot" />
+          <link rel="manifest" href="/_static/favicons/site.webmanifest" />
           <script
             dangerouslySetInnerHTML={{
               __html: `
