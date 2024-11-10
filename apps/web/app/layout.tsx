@@ -1,12 +1,27 @@
 import '@/styles/globals.css'
+import { Analytics } from '@/components/plausible'
 import { ThemeProvider } from '@/components/providers'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { Toaster } from '@/components/ui/sonner'
 import { META_THEME_COLORS, siteConfig } from '@/config/site'
-import { fontMono, fontSans } from '@/lib/fonts'
 import { cn } from '@/lib/utils'
 import type { Metadata, Viewport } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+  preload: true,
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+  preload: true,
+})
 
 export const metadata: Metadata = {
   title: {
@@ -70,10 +85,23 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <>
       <html lang="en" suppressHydrationWarning>
         <head>
-          <link rel="icon" type="image/png" href="/_static/favicons/favicon-96x96.png" sizes="96x96" />
-          <link rel="icon" type="image/svg+xml" href="/_static/favicons/favicon.svg" />
+          <link
+            rel="icon"
+            type="image/png"
+            href="/_static/favicons/favicon-96x96.png"
+            sizes="96x96"
+          />
+          <link
+            rel="icon"
+            type="image/svg+xml"
+            href="/_static/favicons/favicon.svg"
+          />
           <link rel="shortcut icon" href="/_static/favicons/favicon.ico" />
-          <link rel="apple-touch-icon" sizes="180x180" href="/_static/favicons/apple-touch-icon.png" />
+          <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/_static/favicons/apple-touch-icon.png"
+          />
           <meta name="apple-mobile-web-app-title" content="Sidejot" />
           <link rel="manifest" href="/_static/favicons/site.webmanifest" />
           <script
@@ -91,8 +119,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <body
           className={cn(
             'min-h-screen bg-background font-sans antialiased',
-            fontSans.variable,
-            fontMono.variable,
+            geist.variable,
+            geistMono.variable,
           )}
         >
           <ThemeProvider
@@ -110,6 +138,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <TailwindIndicator />
             <ThemeSwitcher />
             <Toaster />
+            <Analytics />
           </ThemeProvider>
         </body>
       </html>
