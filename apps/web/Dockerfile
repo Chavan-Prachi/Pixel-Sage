@@ -12,13 +12,15 @@ RUN pnpm install -g turbo@^2
 FROM deps AS builder
 WORKDIR /app
 COPY . .
-RUN turbo prune @sidejot/web --docker
+RUN turbo prune "@sidejot/web" --docker --scope="@sidejot/web"
 
 FROM deps AS installer
 WORKDIR /app
 
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
 RUN pnpm install
 
 ARG TURBO_TEAM
