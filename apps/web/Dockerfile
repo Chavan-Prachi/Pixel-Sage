@@ -12,7 +12,7 @@ RUN pnpm install -g turbo@^2
 FROM deps AS builder
 WORKDIR /app
 COPY . .
-RUN turbo prune "@sidejot/web" --docker --scope="@sidejot/web"
+RUN turbo prune "@sidejot/web" --docker
 
 FROM deps AS installer
 WORKDIR /app
