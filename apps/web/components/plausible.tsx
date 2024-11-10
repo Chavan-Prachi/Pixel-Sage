@@ -1,7 +1,7 @@
 import Script from 'next/script'
 
 export function Analytics() {
-  const domain = process.env.PLAUSIBLE_DOMAIN || ''
+  const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || ''
   if (!domain) {
     return null
   }
@@ -11,7 +11,8 @@ export function Analytics() {
       defer
       data-domain={domain}
       src={
-        process.env.PLAUSIBLE_SCRIPT_URL || 'https://plausible.io/js/script.js'
+        process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL ||
+        'https://plausible.io/js/script.js'
       }
       strategy="afterInteractive"
     />
