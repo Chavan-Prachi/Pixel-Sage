@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     images: [siteConfig.ogImage],
     creator: '@illyism',
   },
-  manifest: `${siteConfig.url}/site.webmanifest`,
+  manifest: `${siteConfig.url}/_static/favicons/site.webmanifest`,
 }
 
 export const viewport: Viewport = {
