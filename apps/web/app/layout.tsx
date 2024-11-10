@@ -8,6 +8,7 @@ import { META_THEME_COLORS, siteConfig } from '@/config/site'
 import { cn } from '@/lib/utils'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 
 const geist = Geist({
   subsets: ['latin'],
@@ -138,7 +139,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <TailwindIndicator />
             <ThemeSwitcher />
             <Toaster />
-            <Analytics />
+
+            <Suspense fallback={null}>
+              <Analytics />
+            </Suspense>
           </ThemeProvider>
         </body>
       </html>

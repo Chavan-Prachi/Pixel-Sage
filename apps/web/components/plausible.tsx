@@ -1,12 +1,15 @@
 import Script from 'next/script'
 
 export function Analytics() {
-  if (process.env.NODE_ENV !== 'production') return null
-  if (!process.env.PLAUSIBLE_DOMAIN) return null
+  const domain = process.env.PLAUSIBLE_DOMAIN || ''
+  if (!domain) {
+    return null
+  }
 
   return (
     <Script
-      data-domain={process.env.PLAUSIBLE_DOMAIN}
+      defer
+      data-domain={domain}
       src={
         process.env.PLAUSIBLE_SCRIPT_URL || 'https://plausible.io/js/script.js'
       }
