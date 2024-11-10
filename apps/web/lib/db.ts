@@ -1,5 +1,5 @@
 import { startOfDay } from 'date-fns'
-import Dexie, { type Table } from 'dexie'
+import { Dexie, type Table } from 'dexie'
 import { SessionManager } from './session-manager'
 
 /**
@@ -189,7 +189,7 @@ export class SidejotDB extends Dexie {
       console.warn('Multiple plans found for date', date, plans)
     }
     if (plans.length === 0) return null
-    return plans[0]
+    return plans[0] as Plan
   }
 
   async updatePlan(date: Date, content: string): Promise<void> {

@@ -13,7 +13,8 @@
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.26.0",
     "turbo": "^2.2.3",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@sidejot/tsconfig": "workspace:*"
   },
   "packageManager": "pnpm@8.0.0",
   "dependencies": {
