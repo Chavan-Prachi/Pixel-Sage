@@ -19,8 +19,6 @@ WORKDIR /app
 
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
 RUN pnpm install
 
 ARG TURBO_TEAM
@@ -34,7 +32,7 @@ ENV TURBO_API=$TURBO_API
 
 # Build the project
 COPY --from=builder /app/out/full/ .
-RUN pnpm turbo run build --filter=@sidejot/web...
+RUN turbo run build --filter=@sidejot/web...
 
 FROM base AS runner
 WORKDIR /app
