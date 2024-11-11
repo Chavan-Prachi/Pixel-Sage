@@ -37,14 +37,14 @@ Sidejot is built on an open protocol that allows for:
 ```bash
 git clone https://github.com/sidejot/sidejot
 cd sidejot
-pnpm install
-pnpm dev
+yarn install
+yarn dev
 ```
 
 ## 🛠 Prerequisites
 
 - Node.js 20+
-- PNPM 8+
+- Yarn 1.22+
 - Docker (for local development)
 - PostgreSQL 16+ (automatically handled via Docker)
 
