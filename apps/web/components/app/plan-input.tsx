@@ -80,13 +80,19 @@ export function PlanInput() {
     }
   }, [plan?.content])
 
-  const handleGenerateTasks = () => {
+  const handleGenerateTasks = async () => {
     try {
       if (!plan?.content) {
         throw new Error('Please enter a plan first')
       }
       const now = new Date()
-      const endOfWorkDay = setHours(setMinutes(now, 0), 18)
+
+      // Get preferences from the plan, or use defaults
+      const workingHours = plan.preferences?.workingHours ?? {
+        start: 6,
+        end: 18,
+      }
+      const endOfWorkDay = setHours(setMinutes(now, 0), workingHours.end)
       const timeLeft = differenceInMinutes(endOfWorkDay, now)
       const availablePomodoros = Math.floor(timeLeft / 25)
 
@@ -102,8 +108,8 @@ export function PlanInput() {
           timeOfDay: getTimeOfDay(now),
           deviceType: getDeviceType(),
           preferredWorkingHours: {
-            start: 6,
-            end: 18,
+            start: workingHours.start,
+            end: workingHours.end,
           },
         },
       })

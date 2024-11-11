@@ -21,6 +21,14 @@ export interface Plan {
   date: Date
   /** Used for conflict resolution in cross-device sync */
   lastUpdated: Date
+  /** User preferences for the day */
+  preferences?: {
+    /** When the user typically starts and ends their work day (24h format) */
+    workingHours: {
+      start: number
+      end: number
+    }
+  }
 }
 
 export enum TaskStatus {

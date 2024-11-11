@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { siteConfig } from '@/config/site'
 import Link from 'next/link'
 import { ActiveSession } from './app/active-session'
+import { SettingsPopup } from './app/settings'
 
 export function SiteHeader() {
   return (
@@ -16,6 +17,7 @@ export function SiteHeader() {
         <div className="flex flex-1 items-center justify-between gap-2 md:justify-end">
           <ActiveSession />
           <nav className="flex items-center gap-0.5">
+            <SettingsPopup />
             <Button variant="ghost" size="icon" className="h-8 w-8 px-0">
               <Link
                 href={siteConfig.links.github}
