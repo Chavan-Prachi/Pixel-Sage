@@ -9,16 +9,11 @@ RUN apt-get update
 RUN apt-get install -y curl wget
 RUN pnpm install -g turbo@^2
 
-FROM deps AS builder
-WORKDIR /app
-COPY . .
-RUN turbo prune "@sidejot/web" --docker
-
 FROM deps AS installer
 WORKDIR /app
 
-# First install the dependencies (as they change less often)
-COPY --from=builder /app/out/json/ .
+# Copy the entire project and install dependencies
+COPY . .
 RUN pnpm install
 
 ARG TURBO_TEAM
@@ -31,8 +26,7 @@ ARG TURBO_API
 ENV TURBO_API=$TURBO_API
 
 # Build the project
-COPY --from=builder /app/out/full/ .
-RUN turbo run build --filter=@sidejot/web...
+RUN turbo run build
 
 FROM base AS runner
 WORKDIR /app
