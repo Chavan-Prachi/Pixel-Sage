@@ -19,6 +19,9 @@ RUN apk update
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# Add turbo installation here
+RUN yarn global add turbo
+
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
 RUN yarn install
