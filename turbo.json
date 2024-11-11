@@ -1,5 +1,5 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "$schema": "https://turbo.build/schema.v2.json",
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
     "NEXT_PUBLIC_TURSO_DATABASE_URL",
@@ -15,7 +15,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": [
+        "NEXT_PUBLIC_TURSO_DATABASE_URL",
+        "NEXT_PUBLIC_TURSO_AUTH_TOKEN",
+        "NODE_ENV",
+        "OPENAI_API_KEY"
+      ]
     },
     "lint": {
       "outputs": []
@@ -23,6 +29,9 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "//#clean": {
+      "cache": false
     }
   }
 }
