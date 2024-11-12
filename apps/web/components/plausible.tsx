@@ -1,7 +1,8 @@
 import Script from 'next/script'
 
+const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || ''
+
 export function Analytics() {
-  const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || ''
   if (!domain) {
     return null
   }
