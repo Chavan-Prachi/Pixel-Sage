@@ -7,3 +7,8 @@ services:
       context: .
       dockerfile: ./apps/web/Dockerfile
     restart: always
+    environment:
+      - NEXT_PUBLIC_PLAUSIBLE_DOMAIN=${NEXT_PUBLIC_PLAUSIBLE_DOMAIN:-sidejot.com}
+      - NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL=${NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL}
+      - NODE_ENV=${NODE_ENV:-production}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
