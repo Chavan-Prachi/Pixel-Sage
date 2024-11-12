@@ -1,19 +1,12 @@
+import { Squirrel } from 'lucide-react'
+
 type IconProps = React.HTMLAttributes<SVGElement>
 
 export const Icons = {
   logo: (props: IconProps) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20.2 20.2" {...props}>
+    <Squirrel {...props}>
       <title>Sidejot</title>
-      <path
-        fill="currentColor"
-        fillOpacity={0.9}
-        d="M10.1 20.2c5.5 0 10.1-4.6 10.1-10.1S15.6 0 10.1 0s-.9.4-.9.9v3.6c0 .5.3.9.8.9s.8-.4.8-.9V.9L10 2a8 8 0 1 1 .1 16.2A8 8 0 0 1 3.8 5c.4-.5.4-1 0-1.4-.4-.4-1.1-.4-1.5.2A10 10 0 0 0 0 10.1c0 5.5 4.5 10.1 10.1 10.1Z"
-      />
-      <path
-        fill="currentColor"
-        d="M10.1 11.7c.9 0 1.7-.7 1.7-1.6s-.3-1.1-.7-1.4L6.4 5.5c-.6-.4-1.1.2-.7.8L8.8 11c.3.5.8.8 1.4.8Z"
-      />
-    </svg>
+    </Squirrel>
   ),
   twitter: (props: IconProps) => (
     <svg
