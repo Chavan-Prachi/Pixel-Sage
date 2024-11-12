@@ -8,8 +8,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { TimePicker } from '@/components/ui/time-picker'
 import { db } from '@/lib/db'
 import { Settings2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -19,20 +19,30 @@ export function Settings({
 }: {
   setIsOpen: (open: boolean) => void
 }) {
-  const [startHour, setStartHour] = useState('6')
-  const [endHour, setEndHour] = useState('18')
+  const [startTime, setStartTime] = useState('09:00')
+  const [endTime, setEndTime] = useState('17:00')
 
   useEffect(() => {
     async function loadPreferences() {
       const today = new Date()
       const plan = await db.getPlan(today)
       if (plan?.preferences?.workingHours) {
-        setStartHour(plan.preferences.workingHours.start.toString())
-        setEndHour(plan.preferences.workingHours.end.toString())
+        const start = plan.preferences.workingHours.start
+        const end = plan.preferences.workingHours.end
+        setStartTime(formatTime(start))
+        setEndTime(formatTime(end))
       }
     }
     loadPreferences()
   }, [])
+
+  const formatTime = (hour: number) => {
+    return `${hour.toString().padStart(2, '0')}:00`
+  }
+
+  const parseTime = (time: string) => {
+    return Number.parseInt(time.split(':')[0])
+  }
 
   const handleSave = async () => {
     const today = new Date()
@@ -40,8 +50,8 @@ export function Settings({
     await db.plans.update(plan.id!, {
       preferences: {
         workingHours: {
-          start: Number.parseInt(startHour),
-          end: Number.parseInt(endHour),
+          start: parseTime(startTime),
+          end: parseTime(endTime),
         },
       },
     })
@@ -50,32 +60,13 @@ export function Settings({
 
   return (
     <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="startHour" className="text-right">
-          Start Hour
-        </Label>
-        <Input
-          id="startHour"
-          type="number"
-          min="0"
-          max="23"
-          value={startHour}
-          onChange={(e) => setStartHour(e.target.value)}
-          className="col-span-3"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="endHour" className="text-right">
-          End Hour
-        </Label>
-        <Input
-          id="endHour"
-          type="number"
-          min="0"
-          max="23"
-          value={endHour}
-          onChange={(e) => setEndHour(e.target.value)}
-          className="col-span-3"
+      <div className="grid gap-2">
+        <Label>Working Hours</Label>
+        <TimePicker
+          startTime={startTime}
+          endTime={endTime}
+          onStartTimeChange={setStartTime}
+          onEndTimeChange={setEndTime}
         />
       </div>
       <Button onClick={handleSave} className="ml-auto">
