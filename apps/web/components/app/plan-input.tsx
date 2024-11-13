@@ -191,7 +191,7 @@ export function PlanInput() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full bg-neutral-800"
+              className="h-8 w-8 rounded-full dark:bg-neutral-800"
               onClick={handleGenerateTasks}
               disabled={isLoading}
             >
@@ -254,7 +254,7 @@ const TaskCard = ({ task }: { task: Task }) => {
   const isActive = activeSession?.content === task.content
 
   return (
-    <div className="bg-neutral-800 p-2 rounded-lg">
+    <div className="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1">
           <h3 className="text-sm font-medium">{task.content}</h3>
@@ -268,7 +268,7 @@ const TaskCard = ({ task }: { task: Task }) => {
               {task.tags?.map((tag, tagIndex) => (
                 <span
                   key={tagIndex}
-                  className="px-2 py-0.5 text-xs rounded-full bg-neutral-700 text-neutral-200"
+                  className="px-2 py-0.5 text-xs rounded-full bg-neutral-200 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200"
                 >
                   {tag}
                 </span>
