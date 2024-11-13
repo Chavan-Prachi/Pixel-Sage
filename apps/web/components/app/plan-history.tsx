@@ -33,18 +33,18 @@ export function PlanHistory({ onSelect }: PlanHistoryProps) {
           history?.map((entry, i) => (
             <DropdownMenuItem
               key={i}
-            className="flex flex-col items-start gap-1 py-2"
-            onClick={() => {
-              onSelect(entry.input as string)
-              toast.success('Previous plan restored')
-            }}
-          >
-            <div className="text-sm font-medium truncate w-full">
-              {entry.title}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {formatDistanceToNow(entry.timestamp, { addSuffix: true })}
-            </div>
+              className="flex flex-col items-start gap-1 py-2"
+              onClick={() => {
+                onSelect(entry.input as string)
+                toast.success('Previous plan restored')
+              }}
+            >
+              <div className="text-sm font-medium truncate w-full">
+                {entry.title}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {formatDistanceToNow(entry.timestamp, { addSuffix: true })}
+              </div>
             </DropdownMenuItem>
           ))
         ) : (

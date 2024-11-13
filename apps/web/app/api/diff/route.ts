@@ -1,14 +1,13 @@
-import { NextResponse } from 'next/server'
 import { openai } from '@/lib/ai'
 import { generateText } from 'ai'
 import { format } from 'date-fns'
 import { diffWords } from 'diff'
+import { NextResponse } from 'next/server'
 
 async function getTitle(type: string, current: string) {
   const { text } = await generateText({
     model: openai('gpt-4o-mini'),
-    system:
-      `Today is ${format(new Date(), 'MMMM d, yyyy')}. Your task is to write a brief summary of the current ${type}.`,
+    system: `Today is ${format(new Date(), 'MMMM d, yyyy')}. Your task is to write a brief summary of the current ${type}.`,
     prompt: `
 # Current ${type}
 ${current}
@@ -33,7 +32,9 @@ export async function POST(request: Request) {
 
     const diff = diffWords(previous, current)
     const added = diff.filter((part) => part.added).map((part) => part.value)
-    const removed = diff.filter((part) => part.removed).map((part) => part.value)
+    const removed = diff
+      .filter((part) => part.removed)
+      .map((part) => part.value)
 
     console.log(diff)
 
@@ -59,8 +60,7 @@ Return a single, concise sentence summary of the changes (max 5 words), nothing 
 
     const { text } = await generateText({
       model: openai('gpt-4o-mini'),
-      system:
-        `Today is ${format(new Date(), 'MMMM d, yyyy')}. Your task is to write a brief label for the current ${type}.`,
+      system: `Today is ${format(new Date(), 'MMMM d, yyyy')}. Your task is to write a brief label for the current ${type}.`,
       prompt,
     })
     const summary = text.trim()
