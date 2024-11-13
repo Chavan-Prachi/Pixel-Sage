@@ -174,7 +174,7 @@ export class SidejotDB extends Dexie {
       startTime: new Date(),
       type,
       content,
-      duration: type === TimerType.WORK ? 0.1 : 5,
+      duration: type === TimerType.WORK ? 25 : 5,
       sessionId: this.sessionManager.sessionId,
       lastHeartbeat: new Date(),
     }
