@@ -1,11 +1,7 @@
 {
   "name": "@sidejot/monorepo",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "plugins/*"
-  ],
+  "workspaces": ["packages/*", "apps/*", "plugins/*"],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

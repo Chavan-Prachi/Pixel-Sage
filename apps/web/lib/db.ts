@@ -31,57 +31,6 @@ export interface Plan {
   }
 }
 
-export enum TaskStatus {
-  /** The default status when a task is created */
-  READY = 'ready',
-  /** Current task is being worked on / break is in progress */
-  WORK = 'work',
-  /** The 25-min work session has ended, and now on 5-min break */
-  BREAK = 'break',
-  /** Both the work and the break pomodoro have been completed */
-  DONE = 'done',
-  /** Moved to another slot/day (with specific reschedule date) */
-  RESCHEDULED = 'rescheduled',
-  /** Intentionally removed from today's plan */
-  REMOVED = 'removed',
-}
-
-/**
- * Task - AI-generated or user-created work items
- * Structured for Pomodoro-based time management
- * Includes fields needed for sync, analytics, and AI learning
- *
- * There can be multiple tasks with the same content
- * Because if a task is not finished in 25 minutes, the user can choose to continue it for their next pomodoro immediately
- */
-export interface Task {
-  id?: number
-  /** Main task content */
-  content: string
-  /**
-   * If the content is too long, AI generates a 3-4 word title
-   * This helps with quick visual scanning of task lists
-   */
-  title?: string
-  status: TaskStatus
-  /** Links task to specific daily plan */
-  date: Date
-  /** For sorting tasks & sync conflict detection */
-  createdAt: Date
-  /** For sync conflict detection */
-  updatedAt: Date
-  /**
-   * Manual + AI-driven sorting
-   * Preserves user's intended workflow sequence
-   */
-  order: number
-  /**
-   * AI can suggest tags based on description & content
-   * Enables filtered views and reporting later
-   */
-  tags?: string[]
-}
-
 export enum TimerType {
   WORK = 'work',
   BREAK = 'break',
@@ -96,16 +45,15 @@ export enum TimerEndType {
 /** Timer - Tracks actual work & break periods */
 export interface TimerSession {
   id?: number
-  taskId: number
   type: TimerType
-  startTime: Date
-  endTime?: Date
 
   /**
-   * Session length in minutes
-   * 25 for work, 5 for break
-   * Could be customized per user
-   */
+   * Task content
+   * Optional: breaks don't need content */
+  content?: string
+
+  startTime: Date
+  endTime?: Date
   duration: number
 
   /**
@@ -150,7 +98,6 @@ export interface ChatHistory<TInput = unknown, TOutput = unknown> {
 // Define the database
 export class SidejotDB extends Dexie {
   plans!: Table<Plan>
-  tasks!: Table<Task>
   timerSessions!: Table<TimerSession>
   chatHistory!: Table<ChatHistory>
 
@@ -159,12 +106,10 @@ export class SidejotDB extends Dexie {
   constructor() {
     super('sidejot')
 
-    this.version(3).stores({
+    this.version(4).stores({
       plans: '++id, content, date, lastUpdated',
-      tasks:
-        '++id, content, title, status, date, order, createdAt, updatedAt, *tags',
       timerSessions:
-        '++id, taskId, type, startTime, endTime, endType, sessionId, lastHeartbeat',
+        '++id, type, startTime, endTime, endType, sessionId, lastHeartbeat, content',
       chatHistory: '++id, type, timestamp, title, input, output, metadata',
     })
   }
@@ -214,7 +159,7 @@ export class SidejotDB extends Dexie {
 
   // Helper method to start a new pomodoro session
   async startTimerSession(
-    taskId: number,
+    content: string,
     type: TimerType,
   ): Promise<TimerSession> {
     // Abandon any ongoing sessions
@@ -226,10 +171,10 @@ export class SidejotDB extends Dexie {
       })
 
     const session: TimerSession = {
-      taskId,
       startTime: new Date(),
       type,
-      duration: type === TimerType.WORK ? 25 : 5,
+      content,
+      duration: type === TimerType.WORK ? 0.1 : 5,
       sessionId: this.sessionManager.sessionId,
       lastHeartbeat: new Date(),
     }
@@ -256,22 +201,6 @@ export class SidejotDB extends Dexie {
 
   async getActiveSession(): Promise<TimerSession | undefined> {
     return await this.timerSessions.filter((x) => !x.endTime).first()
-  }
-
-  async getTask(taskId: number): Promise<Task | undefined> {
-    return await this.tasks.get(taskId)
-  }
-
-  async getActiveTask(): Promise<Task | undefined> {
-    return await this.tasks.filter((x) => x.status === TaskStatus.WORK).first()
-  }
-
-  async deleteTask(taskId: number): Promise<void> {
-    try {
-      await this.tasks.delete(taskId)
-    } catch (error) {
-      console.error('Error deleting task', error)
-    }
   }
 
   async saveChatHistory<TInput, TOutput>(

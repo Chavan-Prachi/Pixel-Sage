@@ -2,7 +2,7 @@
 import { generatePlanSchema } from '@/app/api/tasks/generate/schema'
 import { Button } from '@/components/ui/button'
 import { useDebouncedCallback } from '@/hooks/use-debounce'
-import { TaskStatus, TimerType, db } from '@/lib/db'
+import { TimerEndType, TimerType, db } from '@/lib/db'
 import { getTimeOfDay } from '@/lib/utils'
 import { getDeviceType } from '@/lib/utils'
 import { experimental_useObject as useObject } from 'ai/react'
@@ -14,6 +14,7 @@ import {
   BrainCog,
   Lightbulb,
   Paperclip,
+  PauseIcon,
   PlayIcon,
   Sparkles,
 } from 'lucide-react'
@@ -30,6 +31,12 @@ import { atomWithStorage } from 'jotai/utils'
 export const lastGeneratedPlanAtom = atomWithStorage<
   typeof generatePlanSchema._output | null
 >('lastGeneratedPlan', null)
+
+interface Task {
+  content: string
+  duration: number
+  tags: string[]
+}
 
 export function PlanInput() {
   const [lastGeneratedPlan, setLastGeneratedPlan] = useAtom(
@@ -82,13 +89,14 @@ export function PlanInput() {
 
   const handleGenerateTasks = async () => {
     try {
-      if (!plan?.content) {
+      const input = plan?.content ?? inputValue
+      if (!input) {
         throw new Error('Please enter a plan first')
       }
       const now = new Date()
 
       // Get preferences from the plan, or use defaults
-      const workingHours = plan.preferences?.workingHours ?? {
+      const workingHours = plan?.preferences?.workingHours ?? {
         start: 6,
         end: 18,
       }
@@ -97,7 +105,7 @@ export function PlanInput() {
       const availablePomodoros = Math.floor(timeLeft / 25)
 
       submit({
-        content: plan.content,
+        content: input,
         currentTime: now.toISOString(),
         endOfWorkDay: endOfWorkDay.toISOString(),
         timeLeft,
@@ -122,8 +130,7 @@ export function PlanInput() {
   const tasks = useMemo(
     () =>
       object?.tasks?.filter(
-        (task): task is { content: string; duration: number; tags: string[] } =>
-          task !== undefined && !!task?.content,
+        (task): task is Task => task !== undefined && !!task?.content,
       ) ?? [],
     [object?.tasks],
   )
@@ -131,8 +138,7 @@ export function PlanInput() {
   const backlog = useMemo(
     () =>
       object?.backlog?.filter(
-        (task): task is { content: string; duration: number; tags: string[] } =>
-          task !== undefined && !!task?.content,
+        (task): task is Task => task !== undefined && !!task?.content,
       ) ?? [],
     [object?.backlog],
   )
@@ -224,66 +230,74 @@ export function PlanInput() {
 const TaskList = ({
   tasks,
 }: {
-  tasks: {
-    content: string
-    duration: number
-    tags: string[]
-  }[]
+  tasks: Task[]
 }) => {
-  const handleStartDraftTask = async (task: (typeof tasks)[0]) => {
-    // Create a real task and start the timer
-    const order = await db.tasks.count()
-    const newTaskId = await db.tasks.add({
-      content: task.content,
-      status: TaskStatus.WORK,
-      date: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      order,
-      tags: task.tags,
-    })
-
-    // Start the timer immediately
-    await db.startTimerSession(newTaskId, TimerType.WORK)
-  }
-
   return (
     <div className="flex flex-col gap-2">
       {tasks.map((task, i) => (
-        <div key={i} className="bg-neutral-800 p-2 rounded-lg">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="text-sm font-medium">{task.content}</h3>
-              {task.duration && (
-                <p className="text-xs text-muted-foreground">
-                  {task.duration} minutes
-                </p>
-              )}
-              {task.tags?.length ? (
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {task.tags?.map((tag, tagIndex) => (
-                    <span
-                      key={tagIndex}
-                      className="px-2 py-0.5 text-xs rounded-full bg-neutral-700 text-neutral-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-primary/10"
-              onClick={() => handleStartDraftTask(task)}
-            >
-              <PlayIcon className="h-4 w-4 text-primary" />
-              <span className="sr-only">Start Task</span>
-            </Button>
-          </div>
-        </div>
+        <TaskCard key={i} task={task} />
       ))}
+    </div>
+  )
+}
+
+const TaskCard = ({ task }: { task: Task }) => {
+  const handleStartDraftTask = async () => {
+    await db.startTimerSession(task.content, TimerType.WORK)
+  }
+
+  const handleStop = async () => {
+    await db.completeTimerSession(task.content, TimerEndType.INTERRUPTED)
+  }
+
+  const activeSession = useLiveQuery(() => db.getActiveSession())
+  const isActive = activeSession?.content === task.content
+
+  return (
+    <div className="bg-neutral-800 p-2 rounded-lg">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1">
+          <h3 className="text-sm font-medium">{task.content}</h3>
+          {task.duration && (
+            <p className="text-xs text-muted-foreground">
+              {task.duration} minutes
+            </p>
+          )}
+          {task.tags?.length ? (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {task.tags?.map((tag, tagIndex) => (
+                <span
+                  key={tagIndex}
+                  className="px-2 py-0.5 text-xs rounded-full bg-neutral-700 text-neutral-200"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        {isActive ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hover:bg-primary/10"
+            onClick={handleStop}
+          >
+            <PauseIcon className="h-4 w-4 text-blue-500" />
+            <span className="sr-only">Stop Task</span>
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hover:bg-primary/10"
+            onClick={handleStartDraftTask}
+          >
+            <PlayIcon className="h-4 w-4 text-primary" />
+            <span className="sr-only">Start Task</span>
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
