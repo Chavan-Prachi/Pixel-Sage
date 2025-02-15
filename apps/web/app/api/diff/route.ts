@@ -1,12 +1,20 @@
-import { openai } from '@/lib/ai'
+import { getOpenAI } from '@/lib/ai'
+import { AI_CONFIG } from '@/lib/config'
 import { generateText } from 'ai'
 import { format } from 'date-fns'
 import { diffWords } from 'diff'
 import { NextResponse } from 'next/server'
 
-async function getTitle(type: string, current: string) {
+async function getTitle(
+  type: string,
+  current: string,
+  apiKey?: string,
+  baseURL?: string,
+  model?: string,
+) {
+  const openai = getOpenAI(apiKey, baseURL)
   const { text } = await generateText({
-    model: openai('gpt-4o-mini'),
+    model: openai(model || AI_CONFIG.defaultModel),
     system: `Today is ${format(new Date(), 'MMMM d, yyyy')}. Your task is to write a brief summary of the current ${type}.`,
     prompt: `
 # Current ${type}
@@ -20,14 +28,34 @@ Return a single, concise sentence summary of the current ${type} (max 5 words), 
 export async function POST(request: Request) {
   try {
     const { current, previous, type } = await request.json()
+    const apiKey = request.headers.get('x-openai-key')
+    const baseURL = request.headers.get('x-base-url')
+    const model = request.headers.get('x-model') || AI_CONFIG.defaultModel
+    const openai = getOpenAI(apiKey, baseURL)
 
     // Skip AI call if there's no previous input to compare
     if (!previous || !current) {
-      return NextResponse.json({ summary: await getTitle(type, current) })
+      return NextResponse.json({
+        summary: await getTitle(
+          type,
+          current,
+          apiKey || undefined,
+          baseURL || undefined,
+          model,
+        ),
+      })
     }
 
     if (previous === current) {
-      return NextResponse.json({ summary: await getTitle(type, current) })
+      return NextResponse.json({
+        summary: await getTitle(
+          type,
+          current,
+          apiKey || undefined,
+          baseURL || undefined,
+          model,
+        ),
+      })
     }
 
     const diff = diffWords(previous, current)
@@ -39,7 +67,15 @@ export async function POST(request: Request) {
     console.log(diff)
 
     if (!added.length && !removed.length) {
-      return NextResponse.json({ summary: await getTitle(type, current) })
+      return NextResponse.json({
+        summary: await getTitle(
+          type,
+          current,
+          apiKey || undefined,
+          baseURL || undefined,
+          model,
+        ),
+      })
     }
 
     const prompt = `Based on the following diff, write a single sentence title for the current ${type}:
@@ -59,7 +95,7 @@ Return a single, concise sentence summary of the changes (max 5 words), nothing 
 `
 
     const { text } = await generateText({
-      model: openai('gpt-4o-mini'),
+      model: openai(model),
       system: `Today is ${format(new Date(), 'MMMM d, yyyy')}. Your task is to write a brief label for the current ${type}.`,
       prompt,
     })

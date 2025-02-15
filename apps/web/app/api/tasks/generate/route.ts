@@ -1,17 +1,26 @@
-import { openai } from '@/lib/ai'
+import { getOpenAI } from '@/lib/ai'
+import { AI_CONFIG } from '@/lib/config'
 import { streamObject } from 'ai'
 import { generatePlanSchema } from './schema'
 
 export async function POST(req: Request) {
   try {
     const input = await req.json()
+    const apiKey = req.headers.get('x-openai-key')
+    const baseURL = req.headers.get('x-base-url')
+    const model = req.headers.get('x-model') || AI_CONFIG.defaultModel
+    const openai = getOpenAI(apiKey, baseURL)
 
     if (!input || !input.content) {
       return new Response('Plan content is required', { status: 400 })
     }
 
+    console.log('apiKey', apiKey)
+    console.log('baseURL', baseURL)
+    console.log('model', model)
+
     const result = await streamObject({
-      model: openai('gpt-4o'),
+      model: openai(model),
       schema: generatePlanSchema,
       output: 'object',
       prompt: `

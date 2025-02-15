@@ -26,6 +26,7 @@ import { AutoResizeTextarea } from '../ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { PlanHistory } from './plan-history'
 
+import { fetchWithKey } from '@/lib/fetch'
 import { useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 export const lastGeneratedPlanAtom = atomWithStorage<
@@ -47,6 +48,7 @@ export function PlanInput() {
     api: '/api/tasks/generate',
     schema: generatePlanSchema,
     initialValue: lastGeneratedPlan,
+    fetch: fetchWithKey,
     onFinish: async (result) => {
       if (result.object) {
         setLastGeneratedPlan(result.object)

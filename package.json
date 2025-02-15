@@ -1,7 +1,11 @@
 {
   "name": "@sidejot/monorepo",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "plugins/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "plugins/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -13,9 +17,9 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.26.0",
+    "@sidejot/tsconfig": "*",
     "turbo": "^2.2.3",
-    "typescript": "^5.0.0",
-    "@sidejot/tsconfig": "*"
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@types/react": "npm:types-react@rc",
@@ -27,5 +31,5 @@
     "react": "19.0.0-rc.0",
     "react-dom": "19.0.0-rc.0"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "yarn@4.6.0"
 }

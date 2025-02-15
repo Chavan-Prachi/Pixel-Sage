@@ -1,5 +1,6 @@
 import { startOfDay } from 'date-fns'
 import { Dexie, type Table } from 'dexie'
+import { fetchWithKey } from './fetch'
 import { SessionManager } from './session-manager'
 
 /**
@@ -28,6 +29,12 @@ export interface Plan {
       start: number
       end: number
     }
+    /** API key for AI requests */
+    openRouterKey?: string
+    /** Base URL for AI API requests */
+    baseURL?: string
+    /** Model to use for AI requests */
+    model?: string
   }
 }
 
@@ -106,7 +113,7 @@ export class SidejotDB extends Dexie {
   constructor() {
     super('sidejot')
 
-    this.version(4).stores({
+    this.version(5).stores({
       plans: '++id, content, date, lastUpdated',
       timerSessions:
         '++id, type, startTime, endTime, endType, sessionId, lastHeartbeat, content',
@@ -240,7 +247,7 @@ export class SidejotDB extends Dexie {
       }
 
       // Call the diff API endpoint
-      const response = await fetch('/api/diff', {
+      const response = await fetchWithKey('/api/diff', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -274,6 +281,12 @@ export class SidejotDB extends Dexie {
       .reverse()
       .limit(limit)
       .toArray()) as ChatHistory<TInput, TOutput>[]
+  }
+
+  async getOpenRouterKey(): Promise<string | undefined> {
+    const today = new Date()
+    const plan = await this.getPlan(today)
+    return plan?.preferences?.openRouterKey
   }
 }
 
