@@ -1,7 +1,11 @@
 {
   "name": "@sidejot/monorepo",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "plugins/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "plugins/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -14,7 +18,7 @@
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.26.0",
     "@sidejot/tsconfig": "*",
-    "turbo": "^2.2.3",
+    "turbo": "^2.4.2",
     "typescript": "^5.0.0"
   },
   "dependencies": {
