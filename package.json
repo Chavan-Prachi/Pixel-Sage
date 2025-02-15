@@ -1,11 +1,7 @@
 {
   "name": "@sidejot/monorepo",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "plugins/*"
-  ],
+  "workspaces": ["packages/*", "apps/*", "plugins/*"],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -31,5 +27,5 @@
     "react": "19.0.0-rc.0",
     "react-dom": "19.0.0-rc.0"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@1.22.22"
 }
