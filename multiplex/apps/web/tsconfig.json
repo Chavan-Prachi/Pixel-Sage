@@ -1,5 +1,5 @@
 {
-  "extends": "@sidejot/tsconfig/nextjs.json",
+  "extends": "@multiplex/tsconfig/nextjs.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
     "baseUrl": ".",

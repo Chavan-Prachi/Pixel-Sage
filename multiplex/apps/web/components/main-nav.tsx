@@ -26,7 +26,7 @@ export function MainNav() {
             pathname === '/' ? 'text-foreground' : 'text-foreground/60',
           )}
         >
-          App
+          Plan-AI
         </Link>
       </nav>
     </div>

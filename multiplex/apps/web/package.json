@@ -43,7 +43,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@sidejot/tsconfig": "*",
+    "@multiplex/tsconfig": "*",
     "@types/diff": "^6.0.0",
     "@types/node": "^20.17.19",
     "@types/react": "npm:types-react@rc",
