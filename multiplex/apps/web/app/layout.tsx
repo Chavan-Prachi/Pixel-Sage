@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   authors: [
     {
       name: 'Sidejot',
-      url: 'https://github.com/sidejot',
+      url: 'https://github.com/multiplex',
     },
   ],
   creator: 'Sidejot',

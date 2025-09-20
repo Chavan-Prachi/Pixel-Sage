@@ -111,7 +111,7 @@ export class SidejotDB extends Dexie {
   private sessionManager = SessionManager.getInstance()
 
   constructor() {
-    super('sidejot')
+    super('multiplex')
 
     this.version(5).stores({
       plans: '++id, content, date, lastUpdated',

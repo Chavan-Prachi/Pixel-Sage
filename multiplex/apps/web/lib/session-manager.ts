@@ -1,6 +1,6 @@
 export class SessionManager {
-  private static readonly DEVICE_ID_KEY = 'sidejot_device_id'
-  private static readonly TAB_ID_KEY = 'sidejot_tab_id'
+  private static readonly DEVICE_ID_KEY = 'multiplex_device_id'
+  private static readonly TAB_ID_KEY = 'multiplex_tab_id'
 
   private static instance: SessionManager
 

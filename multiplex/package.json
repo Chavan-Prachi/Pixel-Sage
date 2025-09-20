@@ -1,5 +1,5 @@
 {
-  "name": "@sidejot/monorepo",
+  "name": "@multiplex/monorepo",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -17,7 +17,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.26.0",
-    "@sidejot/tsconfig": "*",
+    "@multiplex/tsconfig": "*",
     "turbo": "^2.4.2",
     "typescript": "^5.0.0"
   },

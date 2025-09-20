@@ -859,7 +859,7 @@
   resolved "https://registry.npmjs.org/@radix-ui/rect/-/rect-1.1.1.tgz"
   integrity sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==
 
-"@sidejot/tsconfig@*", "@sidejot/tsconfig@file:C:\\Pixel-Sage\\Plan-ai\\packages\\tsconfig":
+"@multiplex/tsconfig@*", "@multiplex/tsconfig@file:C:\\Pixel-Sage\\Plan-ai\\packages\\tsconfig":
   version "0.0.0"
   resolved "file:packages/tsconfig"
 

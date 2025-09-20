@@ -35,8 +35,8 @@ Sidejot is built on an open protocol that allows for:
 ## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/sidejot/sidejot
-cd sidejot
+git clone https://github.com/multiplex/multiplex
+cd multiplex
 yarn install
 yarn dev
 ```
