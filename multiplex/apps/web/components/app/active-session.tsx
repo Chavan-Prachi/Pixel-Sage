@@ -93,7 +93,7 @@ export function ActiveSession() {
     return () => {
       clearInterval(interval)
       document.title = originalTitle
-      setFavicon('🐿️')
+      setFavicon('✨')
     }
   }, [
     activeSession?.startTime,
