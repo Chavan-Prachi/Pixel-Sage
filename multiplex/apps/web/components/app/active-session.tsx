@@ -39,8 +39,6 @@ export function ActiveSession() {
     const isWork = activeSession.type === TimerType.WORK
     const content = activeSession.content || (isWork ? 'Work' : 'Break')
 
-    setFavicon(isWork ? '🎯' : '☕')
-
     const interval = setInterval(async () => {
       const elapsed = Date.now() - activeSession.startTime.getTime()
       const durationMs = activeSession.duration * 60 * 1000
@@ -93,7 +91,7 @@ export function ActiveSession() {
     return () => {
       clearInterval(interval)
       document.title = originalTitle
-      setFavicon('🐿️')
+      setFavicon('✨')
     }
   }, [
     activeSession?.startTime,
