@@ -1,12 +1,12 @@
-import { Squirrel } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
 type IconProps = React.HTMLAttributes<SVGElement>
 
 export const Icons = {
   logo: (props: IconProps) => (
-    <Squirrel {...props}>
-      <title>Sidejot</title>
-    </Squirrel>
+    <Sparkles {...props}>
+      <title>Multiplex</title>
+    </Sparkles>
   ),
   twitter: (props: IconProps) => (
     <svg
