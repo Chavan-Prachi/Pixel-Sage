@@ -31,5 +31,5 @@
     "react": "19.0.0-rc.0",
     "react-dom": "19.0.0-rc.0"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "npm@9.8.0"
 }
